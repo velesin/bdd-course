@@ -685,7 +685,7 @@ expect(unauthorizedUser).not.toBeLoggedIn
 
 ---
 
-##remove clutter even further
+##hide irrelevant information
 
 - custom assertions
 - helper methods
@@ -713,12 +713,87 @@ expect(user.isActive).toBeFalse
 better
 
 ```
-user = createActiveUser() # factory hiding user fixture creation details
+user = createActiveUser() # factory hiding irrelevant user creation details
 
-publishSpam(user) # helper method hiding marking post as spam details
+publishSpam(user) # helper method hiding irrelevant post flagging details
 
-expect(user).toBeDeactivated # more meaningfull custom assertion
+expect(user).toBeDeactivated # custom assertion hiding irr. status details
 ```
+
+---
+
+##given / when / then
+
+every test can be reduced to these 3 distinct phases:
+
+- given = test setup (previous system state)
+- when = user or system action (state change)
+- then = expectations (new system state)
+
+---
+
+at least separate these 3 phases visually with whitespace
+
+```
+user.logIn
+visit "/profile"
+
+fillIn ".new-post", "some text"
+click ".submit-post"
+
+visit "/recent-posts"
+post = findFirst ".post"
+expect(post.text).toEqual "some text"
+```
+
+or be hardcore and reduce them to meaningful one-liners
+
+```
+given_user_is_logged_in_to_profile_page
+
+when_user_creates_new_post
+
+then_new_post_is_published_at_the_top_of_recent_posts_list
+```
+
+---
+
+for low-level unit tests this is often an overkill:
+
+```
+given_empty_array_exists
+when_new_item_is_added
+
+#vs
+
+array = []
+array.push "new item"
+```
+
+but for more complicated tests (esp. e2e acceptance tests)
+
+```
+when_user_registers_an_account
+
+#vs
+
+visit "/sign-up"
+fillIn ".login", "some_login"
+fillIn ".password", "some_pwd"
+fillIn ".confirm-password", "some_pwd"
+click ".submit"
+visit "/confirm-signup"
+click ".confirmation-link"
+```
+
+makes a big difference
+
+---
+
+##the simplest heuristic
+
+- ideal unit tests should read like a good API docs
+- ideal acceptance tests should read like a good user manual
 </script>
                 </section>
 
