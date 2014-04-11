@@ -1,0 +1,748 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>TDD / BDD</title>
+
+		<meta name="description" content="A course on TDD, BDD and automated testing in general - patterns, principles and guidelines">
+		<meta name="author" content="Wojciech Zawistowski">
+
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+		<link rel="stylesheet" href="css/reveal.min.css">
+		<link rel="stylesheet" href="css/theme/default.css" id="theme">
+
+		<!-- For syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+                <section data-markdown data-separator="^\n---\n$" data-vertical="^\n--\n$">
+<script type="text/template">
+#TDD / BDD
+
+###Principles, patterns and guidelines
+
+<small>by Wojciech Zawistowski</small>
+
+---
+
+##Types of tests
+
+- end-to-end (e2e)
+- unit
+- integration
+
+---
+
+##e2e
+
+- treat system as a black box<br><small>(no "manual" DB reads / writes!)</small>
+- slow and harder to debug<br><small>(should test only main paths, not edge cases)</small>
+- goal: ensure correct "wiring"<br><small>(no mocks, production-like configuration)</small>
+
+---
+
+##unit
+
+- test small, autonomous units<br><small>(typically single class)</small>
+- partially white box<br><small>(black box unit internals, white box unit API and interactions)</small>
+- fast and easy to debug<br><small>(should test edge cases)</small>
+- goal: maximum isolation<br><small>(don't test unit dependencies - stub them)</small>
+
+---
+
+##unit & e2e = complementary
+
+- they serve different purpose<br><small>(it's not a stylistic choice)</small>
+- both types should be used together<br><small>(otherwise test suite cannot be fully trusted)</small>
+
+---
+
+##integration
+
+- test connections with 3rd party code<br><small>(e.g. file system, database, web service, library)</small>
+- easy to debug but slow<br><small>(use where necessary, but minimize their number)</small>
+- may or may not test edge cases<br><small>(depends on your knowledge and trust in 3rd party service)</small>
+- goal: test single integration point<br><small>(shouldn't test the whole system or business logic)</small>
+
+---
+
+##when to write tests
+
+after the code
+
+vs
+
+before the code (TDD)
+
+---
+
+##tests after the code
+
+- prevent regression in future<br><small>(tests will tell us if new feature breaks the old code)</small>
+- difficult to write<br><small>(code design may turn out to be untestable)</small>
+- time consuming<br><small>(we test twice: manually when coding and via test suite)</small>
+
+---
+
+##TDD
+
+- enables emergent design<br><small>(experiments and refactoring during coding are easy)</small>
+- enforces better design<br><small>(low coupling, easier to use APIs, code easy to modify)</small>
+- easier to write tests<br><small>(design supports testing from the start)</small>
+- less time consuming<br><small>(no manual testing when coding)</small>
+
+---
+
+##two "flavors"
+
+"classic" TDD
+
+vs
+
+Behavior Driven Development (BDD)
+
+---
+
+##TDD
+
+- focused on functionality<br><small>(tests usually organized per API method)</small>
+- higher code coverage<br><small>(may potentially cover more edge cases)</small>
+- bloated, redundant code and tests<br><small>(we test - and thus code - everything we can)</small>
+
+---
+
+##BDD
+
+- focused on specification<br><small>(tests usually organized per feature)</small>
+- better requirements coverage<br><small>(tests are clearer about the purpose of the code)</small>
+- works great as a live documentation<br><small>(tests cover real usage scenarios)</small>
+- no unnecessary code<br><small>(we test - and thus code - only real business needs)</small>
+
+---
+
+##similar e2e tests "flavors"
+
+- functional ~ TDD
+- acceptance ~ BDD
+
+---
+
+##OK, Example...
+
+---
+
+##TDD
+
+focus on code (methods)
+
+```
+describe "DartGame.scorePoints", ->
+    ...
+
+describe "DartGame.isWin", ->
+    ...
+```
+
+---
+
+```
+describe "DartGame.scorePoints", ->
+    beforeEach ->
+        game.setPoints 10
+
+    it "updates points when scoring", ->
+        game.scorePoints 9
+        expect(game.getPoints).toEqual 1
+
+    it "updates points when scoring all the points left", ->
+        game.scorePoints 10
+        expect(game.getPoints).toEqual 0
+
+    it "does not update points when overscoring", ->
+        game.scorePoints 11
+        expect(game.getPoints).toEqual 10
+```
+
+---
+
+```
+describe "DartGame.isWin", ->
+    it "returns false when score is greater than zero", ->
+        game.setPoints 1
+        expect(game.isWin).toBeFalse
+
+    it "returns true when score equals zero", ->
+        game.setPoints 0
+        expect(game.isWin).toBeTrue
+```
+
+---
+
+##seems legit, but...
+
+---
+
+```
+it "updates points when scoring all the points left", ->
+    game.scorePoints 10
+    expect(game.getPoints).toEqual 0
+```
+
+Do we really care if points are zeroed?<br><small>Or only if the game is marked as won?</small>
+
+---
+
+```
+it "returns true when score equals zero", ->
+    game.setPoints 0
+    expect(game.isWin).toBeTrue
+```
+
+Do we really care if the game is won when points EQUAL zero?<br><small>Or rather when they REACH zero?</small>
+
+Is it realistic scenario to win the game by SETTING the points?<br><small>Or rather should the game be won by SCORING proper number of points?</small>
+
+---
+
+How to find all the legal "moves" in a game?<br><small>Simple cross section of all scorePoints tests with all isWin tests gives also some obviously invalid combinations... To find only the valid ones you need to reverse engineer the tests.</small>
+
+---
+
+##BDD
+
+focus on domain (game flow)
+
+```
+describe "Dart game: scoring", ->
+    ...
+
+describe "Dart game: overscoring", ->
+    ...
+
+describe "Dart game: scoring exactly", ->
+    ...
+```
+
+---
+
+```
+describe "Dart game: scoring", ->
+    beforeEach ->
+        game.setPoints 10
+        game.scorePoints 9
+
+    it "updates points", ->
+        expect(game.getPoints).toEqual 1
+
+    it "does not result in a win yet", ->
+        expect(game).not.toBeWin
+```
+
+---
+
+```
+describe "Dart game: overscoring", ->
+    beforeEach ->
+        game.setPoints 10
+        game.scorePoints 11
+
+    it "does not update points", ->
+        expect(game.getPoints).toEqual 10
+
+    it "does not result in a win", ->
+        expect(game).not.toBeWin
+```
+
+---
+
+```
+describe "Dart game: scoring exactly", ->
+    beforeEach ->
+        game.setPoints 10
+        game.scorePoints 10
+
+    it "results in a win", ->
+        expect(game).toBeWin
+```
+
+---
+
+##Why is it better?
+
+---
+
+```
+describe "Dart game: scoring exactly", ->
+    it "results in a win", ->
+        expect(game).toBeWin
+
+    # there is no test related to updating points!
+```
+
+We don't care if points are zeroed or not in a win condition<br><small>Of course we could IF there are such business requirements (but no guessing!)</small>
+
+---
+
+```
+describe "Dart game: scoring exactly", ->
+    beforeEach ->
+        ...
+        game.scorePoints 10
+
+    it "results in a win", ->
+        ...
+```
+
+We check realistic win condition: scoring exactly<br><small>(not setting the points "by hand")</small>
+
+---
+
+How to find all the legal "moves" in a game?<br><small>By straightforward reading the test...</small>
+
+```
+describe "Dart game: scoring", ->
+
+describe "Dart game: overscoring", ->
+
+describe "Dart game: scoring exactly", ->
+```
+
+---
+
+##TDD workflow
+
+- red
+- green
+- refactor
+
+---
+
+##red
+
+- decide about the next test<br><small>(it's OK to plan ahead, but overplanning fights emergent design)</small>
+- write a test that FAILS<br><small>(or even only a small part of a test)</small>
+- never skip this step!<br><small>(or you won't be sure if the test really works)</small>
+
+---
+
+##green
+
+- implement code to make test pass<br><small>(only the new one from the red step - don't batch it)</small>
+- implement MINIMAL solution<br><small>(even if it seems really, really dumb)</small>
+- never add code not driven by test<br><small>(even if it seems simple and obvious)</small>
+
+---
+
+##refactor
+
+- clean up code from the previous step<br><small>(not always necessary, but you should CONSIDER it every cycle)</small>
+- this step is critical!<br><small>(emergent design is still a DESIGN - only postponed in time)</small>
+- experiment - it's safe!<br><small>(you're covered by tests)</small>
+- tests should be refactored too<br><small>(they are your requirements - you want them clean!)</small>
+
+---
+
+##step-by-step example
+
+---
+
+First little bit of a test
+
+```
+# the test
+describe "User", ->
+    it "provides name and surname parts of full name", ->
+        user = new User
+```
+
+It's only the test setup, no expectations yet, but we still pause here and run the test...
+
+...and the test fails - no User class yet.
+
+---
+
+Now some code to make it pass
+
+```
+# the test
+describe "User", ->
+    it "provides name and surname parts of full name", ->
+        user = new User
+```
+
+```
+#the code
+class User
+```
+
+Yep, just that. Now the test passes.
+
+---
+
+Now we exercise the User
+
+```
+# the test
+describe "User", ->
+    it "provides name and surname parts of full name", ->
+        user = new User
+
+        user.setFullName "Wojciech Zawistowski"
+```
+
+```
+#the code
+class User
+```
+
+Test fails - no setFullName method.
+
+---
+
+Minimal possible step to make test pass
+
+```
+# the test
+describe "User", ->
+    it "provides name and surname parts of full name", ->
+        user = new User
+
+        user.setFullName "Wojciech Zawistowski"
+```
+
+```
+#the code
+class User
+    setFullName: (fullName) ->
+```
+
+Yes, method does nothing for now, not even assigns to a var.
+
+---
+
+Finally, actual expectations
+
+```
+# the test
+describe "User", ->
+    it "provides name and surname parts of full name", ->
+        user = new User
+
+        user.setFullName "Wojciech Zawistowski"
+
+        expect(user.name).toEqual "Wojciech"
+        expect(user.surname).toEqual "Zawistowski"
+```
+
+```
+#the code
+class User
+    setFullName: (fullName) ->
+```
+
+And finally a business logic related test fail.
+
+---
+
+Minimal step to make it pass
+
+```
+# the test
+describe "User", ->
+    it "provides name and surname parts of full name", ->
+        user = new User
+
+        user.setFullName "Wojciech Zawistowski"
+
+        expect(user.name).toEqual "Wojciech"
+        expect(user.surname).toEqual "Zawistowski"
+```
+
+```
+#the code
+class User
+    setFullName: (fullName) ->
+
+    name: -> "Wojciech"
+
+    surname: -> "Zawistowski"
+```
+
+Yes, hardcoded! It seems dumb, but it proves that the test works.
+
+---
+
+And the second test
+
+```
+# the test
+describe "User", ->
+    it "provides name and surname parts of full name", ->
+        user = new User
+
+        user.setFullName "Wojciech Zawistowski"
+
+        expect(user.name).toEqual "Wojciech"
+        expect(user.surname).toEqual "Zawistowski"
+
+        # it works also when full name is updated
+        user.setFullName "Chuck Norris"
+
+        expect(user.name).toEqual "Chuck"
+        expect(user.surname).toEqual "Norris"
+```
+
+Very ugly copy paste (but it's the easiest thing to do for now).
+
+---
+
+We make it pass
+
+```
+#the code
+class User
+    setFullName: (fullName) ->
+        fullNameParts = fullName.split(" ")
+        @name = fullName[0]
+        @surname = fullName[1]
+
+    name: -> @name
+
+    surname: -> @surname
+```
+
+Finally, a real business logic!
+
+---
+
+Now it's time to clean up the (UGLY!) test<br><small>(remember red, green, REFACTOR?)</small>
+
+```
+# the test
+describe "User: accessing name and surname parts of full name", ->
+    beforeEach ->
+        user = new User
+        user.setFullName "Wojciech Zawistowski"
+
+    it "works for initially set full name", ->
+        expect(user.name).toEqual "Wojciech"
+        expect(user.surname).toEqual "Zawistowski"
+
+    it "works for updated full name"
+        user.setFullName "Chuck Norris"
+
+        expect(user.name).toEqual "Chuck"
+        expect(user.surname).toEqual "Norris"
+```
+
+Remove all duplication etc. - the same as in "real" code.
+
+---
+
+##and so on...
+
+we've seen only the test refactoring, but for code it's the same:
+
+- code the quick and dirty solution to make the test pass
+- refactor the code to look pretty immediately afterwards
+
+---
+
+e.g. to add param validation to setFullName, we would:
+
+- write test checking if invalid name throws error
+- make it pass via inline IF in setFullName
+- extract validation to a standalone method
+
+---
+
+##coding in baby steps
+
+- may seem like wasted work<br><small>(and often even like a plain dumb thing to do)</small>
+- but it gives instant feedback<br><small>(if something breaks you know instantly what caused this)</small>
+- and it is much more effective<br><small>(debugging big blocks of code is slower than simple refactorings)</small>
+
+---
+
+##3 rules of hardcore TDD
+
+- always listen to the tests<br><small>(if writing test is hard, don't fight the test - redesign the code)</small>
+- no manual testing, ever<br><small>(tests &ne; only validation - exploratory tests)</small>
+- tests are more important than code<br><small>(easier to reproduce code from tests than tests from code)</small>
+
+---
+
+##good tests must be
+
+- readable
+- debuggable
+- reliable
+- maintainable
+
+---
+
+##readability
+
+- tests are live API documentation<br><small>(you don't want misleading documentation)</small>
+- tests guide emergent design<br><small>(you don't want to design against unclear specification)</small>
+- tests guard against regression<br><small>(you need to know which requirements conflicted and why)</small>
+
+---
+
+##test method naming
+
+- precise
+- descriptive
+- focused
+
+---
+
+##should read as a specification
+
+bad
+
+```
+test_invoice_email() {...}
+```
+
+better
+
+```
+test_that_invoice_email_is_sent_when_invoice_is_issued() {...}
+```
+
+---
+
+##explain purpose not implementation
+
+bad
+
+```
+test_that_logIn_returns_null_when_moderator_flag_is_true() {...}
+```
+
+better
+
+```
+test_that_user_banned_by_moderator_cannot_log_in() {...}
+```
+
+---
+
+##self-explanatory names in test code
+
+- variable names
+- fixture names
+- even variables and fixture content!
+
+---
+
+bad
+
+```
+user = User.logIn "qweert", "abcdefgh"
+
+expect(user).not.toBeLoggedIn
+```
+
+better
+
+```
+validLogin = "qweert"
+invalidPassword = "abcdefgh"
+
+user = User.logIn validLogin, invalidPassword
+
+expect(user).not.toBeLoggedIn
+```
+
+even better
+
+```
+validLogin = "valid_username"
+invalidPassword = "pw_without_at_least_one_digit"
+
+unauthorizedUser = User.logIn validLogin, invalidPassword
+
+expect(unauthorizedUser).not.toBeLoggedIn
+```
+
+---
+
+##remove clutter even further
+
+- custom assertions
+- helper methods
+- object factories
+
+---
+
+bad
+
+```
+user = new User
+    name: "Irrelevant Name"
+    address: "Some Irrelevant Address"
+    isActive: true
+
+post = new Post
+    author: user
+    text: "some irrelevant text"
+post.publish()
+post.flagAsSpam()
+
+expect(user.isActive).toBeFalse
+```
+
+better
+
+```
+user = createActiveUser() # factory hiding user fixture creation details
+
+publishSpam(user) # helper method hiding marking post as spam details
+
+expect(user).toBeDeactivated # more meaningfull custom assertion
+```
+</script>
+                </section>
+
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.min.js"></script>
+
+		<script>
+
+			Reveal.initialize({
+				history: true,
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
