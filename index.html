@@ -790,10 +790,150 @@ makes a big difference
 
 ---
 
-##the simplest heuristic
+##the simplest readability heuristic
 
 - ideal unit tests should read like a good API docs
 - ideal acceptance tests should read like a good user manual
+
+---
+
+##debuggability
+
+- tests must give clear and instant feedback<br><small>(when a suite fails, you should immediately know which test failed)</small>
+- tests must precisely pinpoint the problem<br><small>(test should tell you exactly what failed and why)</small>
+- tests should be self-sufficient<br><small>(no debugger, console.log or print statements should be needed when TDD-ing)</small>
+
+---
+
+The RED step from red, green, refactor is also for verification if your failure messages are clear.
+
+---
+
+##debuggability techniques
+
+- meaningful test names
+- detailed assertion messages
+- custom assertions
+
+---
+
+##detailed assertion messages
+
+bad
+```
+assertTrue(user.isAdmin)
+
+# fail message:
+# expected true but got false
+```
+
+better
+```
+assertTrue(user.isAdmin, "user is not an admin")
+
+# fail message:
+# user is not an admin
+```
+
+even better
+
+```
+assertTrue(user.isAdmin, "user in group #{user.group} is not an admin)
+
+# fail message:
+# user in group 'moderators' is not an admin
+```
+
+---
+
+##custom assertions
+
+```
+assertTrue(user.isAdmin, "user in group #{user.group} is not an admin)
+
+# vs
+
+assertAdmin(user)
+```
+
+- encapsulate complex fail messages
+- make test code more concise
+- reusable
+
+---
+
+##how many assertions per test?
+
+- some purists claim only 1
+- this is usually a good rule
+- however, there are exceptions
+- better rule = 1 CONCERN / test
+
+---
+
+bad
+```
+describe "new user", ->
+    it "is not activated and has empty account", ->
+        expect(user).not.toBeActivated
+        expect(user.accountBalance).toEqual 0
+
+# the alarm signal:
+# difficult to name the test without using ANDs or generalizations
+```
+
+better
+```
+describe "new user", ->
+    it "is not activated", ->
+        expect(user).not.toBeActivated
+
+    it "has empty account", ->
+        expect(user.accountBalance).toEqual 0
+```
+
+---
+
+good
+```
+describe "guest user", ->
+    it "has empty address", ->
+        expect(user.address).toBeEmpty
+
+    it "has empty phone number", ->
+        expect(user.phoneNumber).toBeEmpty
+```
+
+even better
+```
+describe "guest user", ->
+    it "has empty contact data", ->
+        expect(user.address).toBeEmpty
+        expect(user.phoneNumber).toBeEmpty
+
+# assertions grouped under a single meaningful concern ("contact data")
+```
+
+---
+
+Depends also how the test framework shows fail messages:
+
+- some show only the first failed assertion in a test
+- other show all failed assertions in a test
+
+<small>(You must decide what's more debuggable and group / distribute assertions accordingly)</small>
+
+---
+
+##the simplest debuggability heuristic
+
+debugging is for production bugs<br><small>(if you have to debug to find why a test failed, you're doing it wrong!!!)</small>
+
+---
+
+##e2e tests debuggability
+
+higher level (requirements instead of code) but the same principles apply
 </script>
                 </section>
 
