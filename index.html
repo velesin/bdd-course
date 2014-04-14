@@ -934,6 +934,59 @@ debugging is for production bugs<br><small>(if you have to debug to find why a t
 ##e2e tests debuggability
 
 higher level (requirements instead of code) but the same principles apply
+
+---
+
+##reliability
+
+- no interdependent tests<br><small>(order of tests or turning some tests off shouldn't matter)</small>
+- no dependency on unreliable resources<br><small>(e.g. network, web services)</small>
+- fully deterministic tests<br><small>(no dependency on system clock, random number generators etc.)</small>
+- no dependency on async / timing related stuff<br><small>(tests shouldn't fail because of a timeout etc.)</small>
+- fast tests<br><small>(slow tests discourage running them often what is against TDD philosophy)</small>
+
+---
+
+##solution = isolation
+
+- stubbing unreliable / slow dependencies (in tests)
+- requires using dependency injection (in code)
+
+---
+
+##the simplest reliability heuristic
+
+no false alarms<br><small>(if a test reports a fail it must mean code is broken, not that the DB connectoin is slow or network is down)</small>
+
+---
+
+##maintainability
+
+Tests support modification of existing features, therefore:
+
+- they will be modified often
+- they must be easy to modify
+- modifications can't ripple throughout the suite
+- small changes can't break big parts of the suite
+
+---
+
+##soution = clean test code
+
+- no duplication
+- encapsulation (helpers, factories etc.)
+- isolation
+- use all other good OO design practices
+
+---
+
+Tests must be constantly maintained (refactored etc.) the same as "normal" production code.
+
+---
+
+##the simplest maintainability heuristic
+
+the same as for any other code (design paterns, code smells etc.)
 </script>
                 </section>
 
