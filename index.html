@@ -987,6 +987,41 @@ Tests must be constantly maintained (refactored etc.) the same as "normal" produ
 ##the simplest maintainability heuristic
 
 the same as for any other code (design paterns, code smells etc.)
+
+---
+
+##isolation
+
+dependency injection + test doubles (stubs, mocks, spies)
+
+---
+
+##quick example
+```
+#tested class
+class Invoice
+    issueNumber: -> currentDate = new Date
+
+#test
+it "issues correct number for 31 Dec", ->
+    #no way to test it...
+```
+
+vs
+
+```
+#tested class
+class Invoice
+    constructor: (dateFactory) -> @dateFactory = dateFactory
+
+    issueNumber: -> currentDate = @dateFactory.currenDate
+
+#test
+it "issues correct number for 31 Dec", ->
+    dateFactoryStub = stub(DateFactory)
+    dateFactoryStub.currentDate.returns(new Date("2000-12-31"))
+    invoice = new Invoice(dateStub)
+```
 </script>
                 </section>
 
