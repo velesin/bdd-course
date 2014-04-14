@@ -1020,7 +1020,7 @@ class Invoice
 it "issues correct number for 31 Dec", ->
     dateFactoryStub = stub(DateFactory)
     dateFactoryStub.currentDate.returns(new Date("2000-12-31"))
-    invoice = new Invoice(dateStub)
+    invoice = new Invoice(dateFactoryStub)
 ```
 </script>
                 </section>
