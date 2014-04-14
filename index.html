@@ -1022,6 +1022,13 @@ it "issues correct number for 31 Dec", ->
     dateFactoryStub.currentDate.returns(new Date("2000-12-31"))
     invoice = new Invoice(dateFactoryStub)
 ```
+
+---
+
+##stubs vs mocks vs spies
+
+- stubs: fake data received FROM dependencies
+- mocks & spies: verify messages sent TO dependencies<br><small>(mocks set expectations before the fact, spies verify expectations after the fact)</small>
 </script>
                 </section>
 
