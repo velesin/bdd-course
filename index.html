@@ -1029,6 +1029,233 @@ it "issues correct number for 31 Dec", ->
 
 - stubs: fake data received FROM dependencies
 - mocks & spies: verify messages sent TO dependencies<br><small>(mocks set expectations before the fact, spies verify expectations after the fact)</small>
+
+---
+
+##stubs vs spies (different purpose)
+
+stubs
+```
+describe "FileConverter", ->
+    it "uppercases file contents", ->
+        fileReaderStub = stub(FileReader)
+        fileReaderStub.read.returns("some text")
+        converter = new FileConverter(fileReaderStub)
+
+        expect(converter.uppercased).toEqual "SOME TEXT"
+```
+
+spies
+```
+describe "AlertPrinter", ->
+    it "sends alert message to a printer", ->
+        printDriverSpy = spy(PrintDriver)
+        alertPrinter = new AlertPrinter(printDriverSpy)
+
+        alertPrinter.sendAlert "some text"
+
+        expect(printDriverSpy.print).toHaveBeenCalledWith "some text"
+```
+
+---
+
+##mocks vs spies (stylistic choice)
+
+mocks
+```
+describe "AlertPrinter", ->
+    it "sends alert message to a printer", ->
+        printDriverMock = mock(PrintDriver)
+        expect(printDriverMock.print).toBeCalledWith "some text"
+        alertPrinter = new AlertPrinter(printDriverMock)
+
+        alertPrinter.sendAlert "some text"
+```
+
+spies
+```
+describe "AlertPrinter", ->
+    it "sends alert message to a printer", ->
+        printDriverSpy = spy(PrintDriver)
+        alertPrinter = new AlertPrinter(printDriverSpy)
+
+        alertPrinter.sendAlert "some text"
+
+        expect(printDriverSpy.print).toHaveBeenCalledWith "some text"
+```
+
+---
+
+##good practices
+
+---
+
+##don't overspecify stubs
+
+ok (you can't avoid it)
+```
+fileReaderStub.read.withParam("file_1.txt").returns "text 1"
+fileReaderStub.read.withParam("file_2.txt").returns "text 2"
+
+expect(concatenator.concat("file_1", "file_2")).toEqual "text 1 text 2"
+```
+
+bad
+```
+fileReaderStub.read.withParam("some_file.txt").returns "some text"
+
+expect(formatter.uppercase("some_file")).toEqual "SOME TEXT"
+
+# in this test we should verify uppercasing, not reading correct file!
+```
+
+better
+```
+# returns "some text" for ANY file - it doesn't matter for this test
+fileReaderStub.read.returns "some text"
+
+expect(formatter.uppercase("some_file")).toEqual "SOME TEXT"
+```
+
+---
+
+##don't overspecify mocks/spies
+
+ok (this is the goal of this test)
+```
+it "sends correct mail", ->
+    user.sendAlertMail
+
+    expect(mailerMock.send).toHaveBeenCalledWith "alert!!!"
+```
+
+bad
+```
+it "blocks duplicate alerts from the same user", ->
+    user.sendAlertMail
+    user.sendAlertMail
+
+    expect(mailerMock.send).toHaveBeenCalledOnce.with "alert!!!"
+    # the goal of this test is to check duplication, not the content
+```
+
+better
+```
+it "blocks duplicate alerts from the same user", ->
+    user.sendAlertMail
+    user.sendAlertMail
+
+    expect(mailerMock.send).toHaveBeenCalledOnce
+```
+
+---
+
+##don't mix mocking and stubbing
+
+bad
+```
+it "sends correct alert mail", ->
+    expect(mailerMock.send).toBeCalledWith("text").andReturn "ok"
+
+    user.sendAlertMail
+
+    expect(user.lastAlertStatus).toEqual "ok"
+
+# tempting, but it hides second concern in a single test method
+```
+
+better
+```
+it "sends correct alert mail", ->
+    expect(mailerMock.send).toBeCalledWith("text")
+
+    user.sendAlertMail
+
+it "stores last alert status code", ->
+    mailerStub.returns "ok"
+
+    user.sendAlertMail
+
+    expect(user.lastAlertStatus).toEqual "ok"
+```
+
+---
+
+sendAlertMail method may crash without status code...
+
+...in such case we should give it any (simplest possible) code:
+
+```
+it "sends correct alert mail", ->
+    expect(mailerMock.send).toBeCalledWith("text").andReturn "whatever"
+
+    user.sendAlertMail
+
+    # and we shouldn't exercise this code with any assertions here!!!
+
+# only here, in separate test, like in previous example...
+it "stores last alert status code", ->
+    mailerStub.returns "ok"
+
+    user.sendAlertMail
+
+    expect(user.lastAlertStatus).toEqual "ok"
+```
+
+---
+
+##stub only 1 level deep<br><small>(The Law of Demeter)</small>
+
+bad
+```
+userStub.getBooking.returns bookingStub
+bookingStub.getHotel.returns hotelStub
+hotelStub.getName.returns "Some Hotel"
+
+mail = new WelcomeBackMail(userStub)
+
+expect(mail.title).toEqual "Welcome back from Some Hotel!"
+```
+
+better
+```
+userStub.getLastBookingHotelName.returns "Some Hotel"
+
+mail = new WelcomeBackMail(userStub)
+
+expect(mail.title).toEqual "Welcome back from Some Hotel!"
+```
+(less brittle test and will force better code design)
+
+---
+
+##don't stub simple value objects
+
+ok
+```
+phoneNumber = new PhoneNumber(prefix: 123, number: 4567890)
+user = new User(phoneNumber)
+```
+
+overkill
+```
+phoneNumberStub = stub(PhoneNumber)
+phoneNumberStub.prefix.returns 123
+phoneNumberStub.number.returns 4567890
+user = new User(phoneNumberStub)
+```
+
+---
+
+##stub/mock only dependencies
+
+Never stub or mock methods of the class you're testing!!!<br><small>(If it seems necessary, you most probably should extract part of the class)</small>
+
+---
+
+##the simplest isolation heuristic
+
+Tests should have short and simple setup.<br><small>(If you have to create too many or nested stubs, consider redesigning your code!)</small>
 </script>
                 </section>
 
