@@ -1365,6 +1365,15 @@ When implementing higher layer code:
 
 - stub all lower layer dependencies<br><small>(they don't exist yet anyway...)</small>
 - don't design lower layer API in advance<br><small>(let the real, emerging needs of higher layer code guide the design)</small>
+
+---
+
+##"spikes"
+
+- sometimes you have no idea how to structure the code<br><small>(so it's difficult to do proper TDD - you have no idea what test to write)</small>
+- you can do a quick experiment (a "spike")<br><small>(try several possible designs, get a feeling how they look like etc.)</small>
+- "spikes" are allowed to have no tests<br><small>(although they MAY have tests - often it's easier/faster to create a spike using TDD)</small>
+- "spikes" MUST be treated as a throwaway prototype<br><small>(ALWAYS delete the spike and rewrite it from scratch using proper TDD process)</small>
 </script>
                 </section>
 
