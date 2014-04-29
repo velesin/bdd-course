@@ -41,6 +41,12 @@
 
 ---
 
+#part 1
+
+###basics
+
+---
+
 ##Types of tests
 
 - end-to-end (e2e)
@@ -585,6 +591,12 @@ e.g. to add param validation to setFullName, we would:
 - always listen to the tests<br><small>(if writing test is hard, don't fight the test - redesign the code)</small>
 - no manual testing, ever<br><small>(tests &ne; only validation - exploratory tests)</small>
 - tests are more important than code<br><small>(easier to reproduce code from tests than tests from code)</small>
+
+---
+
+#part 2
+
+###good practices
 
 ---
 
@@ -1256,6 +1268,74 @@ Never stub or mock methods of the class you're testing!!!<br><small>(If it seems
 ##the simplest isolation heuristics
 
 Tests should have short and simple setup.<br><small>(If you have to create too many or nested stubs, consider redesigning your code!)</small>
+
+---
+
+#part 3
+
+###process
+
+---
+
+##different testing processes
+
+- production bugs
+- greenfield projects
+- legacy projects
+
+---
+
+##production bugs
+
+- find the cause of the bug<br><small>(using normal methods: debugger, logs etc.)</small>
+- write a test covering the discovered cause (red)<br><small>(it should fail exectly because of the problem found in debugging step)</small>
+- fix the bug (green)<br><small>(test should now pass)</small>
+- properly merge the test into other tests (refactor)<br><small>(suite should read as a cohesive documentation not as a bag of random edge cases!)</small>
+
+---
+
+What do you mean by merging the test into other tests?
+
+- test suite describes a set of requirements
+- bug causes are seldom new requirements...
+- ...they're rather "holes" in existing requirements
+- no new special-case tests should be introduced
+- the "holes" in existing tests should be "fixed"
+
+---
+
+##greenfield projects
+
+- top-down approach
+- emergent design
+- reliance on stubs
+
+---
+
+##process
+
+- write acceptance test<br><small>(or even a part of it)</small>
+- create necessary infrastructure<br><small>(enough to make test fail on missing business logic not missing frameworks)</small>
+- create enough code to make acceptance test pass<br><small>(using normal TDD process based on unit tests)</small>
+- write next acceptance test and start over<br><small>(repeat untill all requirements are satisfied)</small>
+
+---
+
+##write unit tests also top-down
+
+- initial acceptance test reveals what views are needed
+- TDD-ing views reveals what controllers are needed
+- TDD-ing controllers reveals what models are needed
+- ...etc.
+
+---
+
+##API discovery
+
+When implementing higher layer code:
+
+- stub all lower layer dependencies<br><small>(they don't exist yet anyway...)</small>
+- don't design lower layer API in advance<br><small>(let the real, emerging needs of higher layer code guide the design)</small>
 </script>
                 </section>
 
