@@ -1259,6 +1259,35 @@ user = new User(phoneNumberStub)
 
 ---
 
+##don't mix logic with resource access
+
+bad (slow tests)
+```
+class Invoice
+    addItem: (item) ->
+        if self.validate(item)
+            self.itemCollection.add(item)
+        self.save()
+        # always hits the DB (on each validation related test branch)
+```
+
+better
+```
+class Invoice
+    addItem: (item) ->
+        if self.validate(item)
+            self.itemCollection.add(item)
+
+class InvoiceRepository
+    saveInvoice: (invoice) ->
+        #...
+
+# adding item to an invoice and saving an invoice are separate concerns
+# (adding item = unit tests, saving invoice = integration test)
+```
+
+---
+
 ##stub/mock only dependencies
 
 Never stub or mock methods of the class you're testing!!!<br><small>(If it seems necessary, you most probably should extract part of the class)</small>
