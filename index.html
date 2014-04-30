@@ -1432,9 +1432,29 @@ some tests may be closer, some must be farther from the refactored code
 
 ---
 
+##pseudo-e2e tests are throwaway!!!
+
+- cover refactored code with proper unit tests
+- delete pseudo-e2e tests afterwards
+- don't keep them for long
+- don't try to maintain them
+
+---
+
 ##pseudo-e2e tests
 
--
+- don't have to cover full API<br><small>(only these methods that use refactored code)</small>
+- may be more detailed than normal e2e tests<br><small>(they need to cover some edge cases to enable safe refactoring)</small>
+- don't have to be clean and well factored<br><small>(they are only temporary safety net and won't be maintained)</small>
+- may be slow<br><small>(you won't run the whole suite of such tests)</small>
+
+---
+
+Yes, creating such safety net is a lot of work...
+
+...that will be thrown away :( ...
+
+...but refactoring without it is much more work (and risk)!
 </script>
                 </section>
 
