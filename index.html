@@ -1455,6 +1455,38 @@ Yes, creating such safety net is a lot of work...
 ...that will be thrown away :( ...
 
 ...but refactoring without it is much more work (and risk)!
+
+---
+
+##exploratory tests
+
+- don't guess how the code works
+- write a test that will show you
+
+---
+
+##explore dependencies
+
+Just try to instantiate a class and see why the test breaks.<br><small>(what other classes it requires)</small>
+
+---
+
+##explore behavior
+
+Set nonsensical assertions and find real value in error message.
+
+---
+
+##a tricky question
+
+- what part of discovered behavior are requirements<br><small>(and should be covered by test suite)</small>
+- and what part of it is accidental<br><small>(and don't have to be covered by test suite)</small>
+
+---
+
+##no good answer
+
+But a good starting point for discussion with your analyst ;)
 </script>
                 </section>
 
