@@ -1374,6 +1374,67 @@ When implementing higher layer code:
 - you can do a quick experiment (a "spike")<br><small>(try several possible designs, get a feeling how they look like etc.)</small>
 - "spikes" are allowed to have no tests<br><small>(although they MAY have tests - often it's easier/faster to create a spike using TDD)</small>
 - "spikes" MUST be treated as a throwaway prototype<br><small>(ALWAYS delete the spike and rewrite it from scratch using proper TDD process)</small>
+
+---
+
+##legacy projects
+
+- require refactoring
+- reliance on higher level, throwaway tests
+- exploratory testing
+
+---
+
+##refactoring
+
+- if legacy code is clean, only untested - just add tests
+- ok, enough jokes ;)
+- to make code testable, we usually need to refactor it
+
+---
+
+##the conundrum
+
+- to make code testable, we need to refactor
+- to be able to refactor safely, we need tests
+
+---
+
+##you can't use unit tests
+
+- code has too many dependencies to be properly isolated
+- refactoring will move code outside of unit test scope
+
+---
+
+##but you can use pseudo-e2e tests
+
+- they cover big enough part of the code so it can move inside
+- they don't require isolation
+
+---
+
+##how to write such pseudo-e2e tests
+
+- as close to the refactored code (to true unit test) as possible
+- high enough to remain stable when reorganizing code
+- think of them as multi-unit tests (the less units the better)
+- if you can inject / mock a dependency then still do it!
+- if you can't, use fixtures and other e2e level test techniques
+
+---
+
+##pseudo-e2e tests example
+
+<img src="pseudo-e2e-tests.png">
+
+some tests may be closer, some must be farther from the refactored code
+
+---
+
+##pseudo-e2e tests
+
+-
 </script>
                 </section>
 
