@@ -137,7 +137,7 @@ Behavior Driven Development (BDD)
 
 - focused on specification<br><small>(tests usually organized per feature)</small>
 - better requirements coverage<br><small>(tests are clearer about the purpose of the code)</small>
-- works great as a live documentation<br><small>(tests cover real usage scenarios)</small>
+- works great as live documentation<br><small>(tests cover real usage scenarios)</small>
 - no unnecessary code<br><small>(we test - and thus code - only real business needs)</small>
 
 ---
@@ -533,7 +533,7 @@ class User
     surname: -> @surname
 ```
 
-Finally, a real business logic!
+Finally, real business logic!
 
 ---
 
@@ -572,7 +572,7 @@ we've seen only the test refactoring, but for code it's the same:
 
 e.g. to add param validation to setFullName, we would:
 
-- write test checking if invalid name throws error
+- write a test checking if invalid name throws error
 - make it pass via inline IF in setFullName
 - extract validation to a standalone method
 
@@ -581,14 +581,14 @@ e.g. to add param validation to setFullName, we would:
 ##coding in baby steps
 
 - may seem like wasted work<br><small>(and often even like a plain dumb thing to do)</small>
-- but it gives instant feedback<br><small>(if something breaks you know instantly what caused this)</small>
+- but it gives instant feedback<br><small>(if something breaks, you instantly know what caused this)</small>
 - and it is much more effective<br><small>(debugging big blocks of code is slower than simple refactorings)</small>
 
 ---
 
 ##3 rules of hardcore TDD
 
-- always listen to the tests<br><small>(if writing test is hard, don't fight the test - redesign the code)</small>
+- always listen to the tests<br><small>(if writing a test is hard, don't fight the test - redesign the code)</small>
 - no manual testing, ever<br><small>(tests &ne; only validation - exploratory tests)</small>
 - tests are more important than code<br><small>(easier to reproduce code from tests than tests from code)</small>
 
@@ -1319,7 +1319,7 @@ Tests should have short and simple setup.<br><small>(If you have to create too m
 - find the cause of the bug<br><small>(using normal methods: debugger, logs etc.)</small>
 - write a test covering the discovered cause (red)<br><small>(it should fail exectly because of the problem found in debugging step)</small>
 - fix the bug (green)<br><small>(test should now pass)</small>
-- properly merge the test into other tests (refactor)<br><small>(suite should read as a cohesive documentation not as a bag of random edge cases!)</small>
+- properly merge the test into other tests (refactor)<br><small>(suite should read as cohesive documentation not as a bag of random edge cases!)</small>
 
 ---
 
